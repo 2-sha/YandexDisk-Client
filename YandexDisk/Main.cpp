@@ -805,6 +805,8 @@ void pathTuning(string &path) {
 		}
 		pos = path.find("/..");
 	}
+	if (path.empty())
+		path = "/";
 }
 
 vector<string> split(string str, string sep) {
