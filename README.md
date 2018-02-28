@@ -2,7 +2,7 @@
 
 **Консольный клиент для взаимодействия с Яндекс Диском**
 
-Для работы нужна библиотека curllib.dll<br>
+Для работы нужна библиотека curllib.dll, libeay32.dll, libsasl.dll, openldap.dll, ssleay32.dll<br>
 
 <h2>Команды</h2>
 
