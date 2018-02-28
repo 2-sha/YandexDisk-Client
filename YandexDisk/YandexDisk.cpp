@@ -3,8 +3,8 @@
 #include <string>
 #include <fstream>
 #include <vector>
-#include "curl/curl.h"
-#include "curl/json.hpp" // https://habrahabr.ru/company/infopulse/blog/254075/
+#include "curl.h"
+#include "json.hpp" // https://habrahabr.ru/company/infopulse/blog/254075/
 using namespace std;
 using namespace yandexdisk;
 using json = nlohmann::json;
