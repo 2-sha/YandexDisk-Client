@@ -37,17 +37,27 @@ int main(int argc, char* argv[]) {
 	SetConsoleOutputCP(1251);
 	cout.setf(ios::left);
 
-	size_t sz;
-	char* buf = nullptr;
-	_dupenv_s(&buf, &sz, "homepath");
+	char buf[MAX_PATH];
+	GetCurrentDirectory(sizeof(buf), buf);
 	dataRef = buf;
-	dataRef = "C:" + dataRef + "\\Documents\\YandexDiskClient";
+	dataRef += "\\YandexDiskClient";
 	configRef = dataRef + "\\common.ini";
 
 	ifstream file(configRef);
 	if (!file.is_open()) {
-		CreateDirectory(dataRef.c_str(), NULL);
+		if (!CreateDirectory(dataRef.c_str(), NULL)) {
+			cout << "Ошибка: Невозможно создать папку для конфигурации!" << endl;
+			cout << "Путь : " << dataRef << endl;
+			system("pause");
+			return 0;
+		}
 		ofstream file(configRef);
+		if (!file.is_open()) {
+			cout << "Ошибка: Невозможно создать файл конфигурации!" << endl;
+			cout << "Путь : " << configRef << endl;
+			system("pause");
+			return 0;
+		}
 		file << "[common]" << endl;
 		file << "client_id=6a7e79466d054c21b187f6dcb8d83e59" << endl;
 		file << "client_secret=bcafaddc48db434cab0124524e48f64b" << endl;
@@ -341,7 +351,7 @@ int main(int argc, char* argv[]) {
 		// Скачать файл
 		else if (findInInput(input, "download")) {
 			if (isTrash) {
-				cout << "Ошибка: Нельзя загрузить файл из корзины" << endl;
+				cout << "Ошибка: Нельзя скачать файл из корзины" << endl;
 				continue;
 			}
 
