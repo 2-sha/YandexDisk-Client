@@ -36,8 +36,8 @@ namespace yandexdisk {
 
 	public:
 		YandexDisk(string CLIENT_ID_, string CLIENT_SECRET_);
+		YandexDisk(string CLIENT_ID_, string CLIENT_SECRET_);
 		~YandexDisk();
-
 
 		/*-------------------------
 		мюярпнийю х бшбнд онкеи

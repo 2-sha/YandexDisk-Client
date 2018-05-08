@@ -1,6 +1,8 @@
 #pragma comment(lib, "curllib.lib")
 #pragma comment(lib, "Shell32.lib")
 #include "YandexDisk.h"
+#include "Functions.h"
+#include "Common.h"
 #include <iostream>
 #include <string>
 #include <algorithm>
@@ -8,6 +10,7 @@
 #include <stdio.h>
 #include <sstream>
 #include <fstream>
+#include <map>
 #include <vector>
 #include <Windows.h>
 #include <iterator>
@@ -16,23 +19,16 @@
 using namespace std;
 using namespace yandexdisk;
 
-bool flag, isTrash;
-string input, currentDir = "/", dataRef, configRef, clientId, clientSecret, token, refreshToken;
+bool isTrash;
+string currentDir = "/", dataRef, configRef, clientId, clientSecret, token, refreshToken;
 vector<File> fileList;
 const int helpWidth = 22;
 
-// Служебные функции
-string convertBytes(double bytes);
-void authorize(YandexDisk &yd, string &token, string &refreshToken);
-string getStr(bool global = false);
-vector<vector<string>> getFileList(const char *root);
-vector<string> split(string str, string sep);
-void pathTuning(string &path);
-bool findInInput(string input, string command);
-bool getUserAnsw(string str);
-int progress(void *p, double dltotal, double dlnow, double ultotal, double ulnow);
-
 int main(int argc, char* argv[]) {
+	funcs["name"];
+
+	return;
+
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 	cout.setf(ios::left);
@@ -59,8 +55,8 @@ int main(int argc, char* argv[]) {
 			return 0;
 		}
 		file << "[common]" << endl;
-		file << "client_id=6a7e79466d054c21b187f6dcb8d83e59" << endl;
-		file << "client_secret=bcafaddc48db434cab0124524e48f64b" << endl;
+		file << "client_id=" << endl;
+		file << "client_secret=" << endl;
 	}
 	file.close();
 
@@ -74,6 +70,13 @@ int main(int argc, char* argv[]) {
 	GetPrivateProfileString("common", "refresh_token", NULL, str, sizeof(str), configRef.c_str());
 	refreshToken = str;
 
+	if (clientId.empty() && clientSecret.empty())
+	{
+		cout << "Ошибка: не указан clientId или clientSecret!" << endl;
+		if (!getUserAnsw("Вы хотите ввести их сейчас?"))
+			return 0;
+	}
+
 	YandexDisk yandexDisk(clientId, clientSecret);
 
 	if (token.empty())
@@ -82,8 +85,31 @@ int main(int argc, char* argv[]) {
 	yandexDisk.setToken(token);
 	yandexDisk.setProgressFunc(progress);
 
-	while (true) {
-		input = getStr(true);
+	while (true) 
+	{
+		string input;
+
+		if (::isTrash)
+			cout << "trash:" << currentDir << ">";
+		else
+			cout << "disk:" << currentDir << ">";
+		getline(cin, input, '\n');
+
+		// Удаление пробелов с начала и конца
+		size_t first = input.find_first_not_of(' ');
+		if (string::npos != first)
+			continue;
+		size_t last = input.find_last_not_of(' ');
+		input = input.substr(first, (last - first + 1));
+		// Удаление лишних пробелов между словами
+		input.erase(
+			unique(input.begin(), input.end(),
+				[](const char &a, const char &b) { return &a == &b || (a == ' ' && b == ' '); }),
+			input.end());
+		// Замена \ на /
+		replace(input.begin(), input.end(), '\\', '/');
+
+
 
 		// Вызод из приложения
 		if (findInInput(input, "exit"))
@@ -781,57 +807,12 @@ int progress(void *p, double dltotal, double dlnow, double ultotal, double ulnow
 	return 0;
 }
 
-bool getUserAnsw(string str) {
-	string input;
-	while (true) {
-		cout << str << " (Y/N): ";
-		input = getStr();
-		if (findInInput(input, "y"))
-			return true;
-		else if (findInInput(input, "n"))
-			return false;
-		else
-			cout << "Ошибка: Некорректное значение" << endl;
-	}
-}
-
 bool findInInput(string input, string command) {
 	transform(input.begin(), input.end(), input.begin(), tolower);
 	int pos = input.find(command);
 	if (pos != string::npos && pos == 0)
 		return true;
 	return false;
-}
-
-void pathTuning(string &path) {
-	size_t pos = path.find("/.."), last_of;
-	while (pos != string::npos) {
-		if (pos == 0) {
-			path.erase(0, 3);
-		}
-		else {
-			last_of = path.find_last_of("/", pos - 1);
-			path.erase(last_of, pos - last_of + 3);
-		}
-		pos = path.find("/..");
-	}
-	if (path.empty())
-		path = "/";
-}
-
-vector<string> split(string str, string sep) {
-	vector<string> parts;
-	int index = 0, prevIndex = 0, l = sep.size();
-	index = str.find(sep, index);
-	if (index == string::npos)
-		return parts;
-	parts.push_back(str.substr(0, index));
-	while (index != string::npos) {
-		prevIndex = index;
-		index = str.find(sep, index + 1);
-		parts.push_back(str.substr(prevIndex + l, index - prevIndex - l));
-	}
-	return parts;
 }
 
 vector<vector<string>> getFileList(const char *root) {
@@ -860,31 +841,6 @@ vector<vector<string>> getFileList(const char *root) {
 	list.erase(list.begin());
 
 	return list;
-}
-
-string getStr(bool global) {
-	string input;
-	if (global) {
-		if (::isTrash)
-			cout << "trash:" << ::currentDir << ">";
-		else
-			cout << "disk:" << ::currentDir << ">";
-	}
-	getline(cin, input, '\n');
-	// Удаление пробелов с начала и конца
-	size_t first = input.find_first_not_of(' ');
-	if (string::npos == first)
-		return input;
-	size_t last = input.find_last_not_of(' ');
-	input = input.substr(first, (last - first + 1));
-	// Удаление лишних пробелов между словами
-	input.erase(
-		unique(input.begin(), input.end(),
-			[](const char &a, const char &b) { return &a == &b || (a == ' ' && b == ' '); }),
-		input.end());
-	// Замена \ на /
-	replace(input.begin(), input.end(), '\\', '/');
-	return input;
 }
 
 void authorize(YandexDisk &yandexDisk, string &token, string &refreshToken) {
