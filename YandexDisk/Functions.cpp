@@ -1,3 +1,1 @@
-#include "Common.h"
-#include <map>
-#include <string>
+#include "stdafx.h"

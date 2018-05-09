@@ -1,22 +1,17 @@
-#include "Common.h"
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <vector>
-using namespace std;
+#include "stdafx.h"
 
-string getStr(bool global) {
-	string input;
+std::string getStr(bool global) {
+	std::string input;
 	if (global) {
 		if (::isTrash)
-			cout << "trash:" << ::currentDir << ">";
+			std::cout << "trash:" << ::currentDir << ">";
 		else
-			cout << "disk:" << ::currentDir << ">";
+			std::cout << "disk:" << ::currentDir << ">";
 	}
-	getline(cin, input, '\n');
+	getline(std::cin, input, '\n');
 	// Удаление пробелов с начала и конца
 	size_t first = input.find_first_not_of(' ');
-	if (string::npos == first)
+	if (std::string::npos == first)
 		return input;
 	size_t last = input.find_last_not_of(' ');
 	input = input.substr(first, (last - first + 1));
@@ -30,23 +25,23 @@ string getStr(bool global) {
 	return input;
 }
 
-bool getUserAnsw(string str) {
-	string input;
+bool getUserAnsw(std::string str) {
+	std::string input;
 	while (true) {
-		cout << str << " (Y/N): ";
+		std::cout << str << " (Y/N): ";
 		input = getStr();
 		if (findInInput(input, "y"))
 			return true;
 		else if (findInInput(input, "n"))
 			return false;
 		else
-			cout << "Ошибка: Некорректное значение" << endl;
+			std::cout << "Ошибка: Некорректное значение" << std::endl;
 	}
 }
 
-void pathTuning(string &path) {
+void pathTuning(std::string &path) {
 	size_t pos = path.find("/.."), last_of;
-	while (pos != string::npos) {
+	while (pos != std::string::npos) {
 		if (pos == 0) {
 			path.erase(0, 3);
 		}
@@ -60,14 +55,14 @@ void pathTuning(string &path) {
 		path = "/";
 }
 
-vector<string> split(string str, string sep) {
-	vector<string> parts;
+std::vector<std::string> split(std::string str, std::string sep) {
+	std::vector<std::string> parts;
 	int index = 0, prevIndex = 0, l = sep.size();
 	index = str.find(sep, index);
-	if (index == string::npos)
+	if (index == std::string::npos)
 		return parts;
 	parts.push_back(str.substr(0, index));
-	while (index != string::npos) {
+	while (index != std::string::npos) {
 		prevIndex = index;
 		index = str.find(sep, index + 1);
 		parts.push_back(str.substr(prevIndex + l, index - prevIndex - l));

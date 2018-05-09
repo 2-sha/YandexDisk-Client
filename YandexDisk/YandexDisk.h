@@ -1,13 +1,10 @@
 #pragma once
-#include <string>
-#include <vector>
-#include <fstream>
-using namespace std;
+#include "stdafx.h"
 
 namespace yandexdisk {
 	struct File {
-		string name;
-		string type;
+		std::string name;
+		std::string type;
 		int size;
 		tm created;
 		tm modified;
@@ -16,8 +13,8 @@ namespace yandexdisk {
 	};
 
 	struct Token {
-		string token;
-		string refreshToken;
+		std::string token;
+		std::string refreshToken;
 
 		Token() : token(), refreshToken() {}
 	};
@@ -25,18 +22,18 @@ namespace yandexdisk {
 	class YandexDisk {
 
 	private:
-		string clientId_, clientSecret_, tokenHeader_, error_, currentOperation_;
+		std::string clientId_, clientSecret_, tokenHeader_, error_, currentOperation_;
 		int(*progressFunc)(void*, double, double, double, double);
 
 		// Запись ответа на HTTP запрос в переменную
-		static size_t writeData(char *ptr, size_t size, size_t nmemb, string* data);
+		static size_t writeData(char *ptr, size_t size, size_t nmemb, std::string* data);
 
 		// Чтение содержимого файла для PUT запроса
 		static size_t readСallback(void *ptr, size_t size, size_t nmemb, FILE *stream);
 
 	public:
-		YandexDisk(string CLIENT_ID_, string CLIENT_SECRET_);
-		YandexDisk(string CLIENT_ID_, string CLIENT_SECRET_);
+		YandexDisk(std::string CLIENT_ID_, std::string CLIENT_SECRET_);
+		YandexDisk(std::string CLIENT_ID_, std::string CLIENT_SECRET_);
 		~YandexDisk();
 
 		/*-------------------------
@@ -44,13 +41,13 @@ namespace yandexdisk {
 		-------------------------*/
 
 		// Ввести токен
-		void setToken(string TOKEN_);
+		void setToken(std::string TOKEN_);
 
 		// Удалить токен
 		void deleteToken();
 
 		// Вывести ошибку
-		string getError();
+		std::string getError();
 
 		// Колбэк функция прогресса
 		void setProgressFunc(int(*f)(void *p, double dltotal, double dlnow, double ultotal, double ulnow));
@@ -64,13 +61,13 @@ namespace yandexdisk {
 		-------------------------*/
 
 		// POST запрос cо скрытыми полями
-		string postQuery(const char href[], const char postFields[], const char headers[] = "");
+		std::string postQuery(const char href[], const char postFields[], const char headers[] = "");
 
 		// REST запрос
-		string restQuery(const char href[], const char type[], const char headers[] = "");
+		std::string restQuery(const char href[], const char type[], const char headers[] = "");
 
 		// PUT запрос
-		string putQuery(const char href[], const char fileLink[], const char headers[] = "");
+		std::string putQuery(const char href[], const char fileLink[], const char headers[] = "");
 
 
 		/*-------------------------
@@ -78,10 +75,10 @@ namespace yandexdisk {
 		-------------------------*/
 
 		// Авторизация по коду
-		Token authorizationByCode(string code);
+		Token authorizationByCode(std::string code);
 
 		// Авторизация по refresh токену
-		Token authorizationByRefresh(string refreshToken);
+		Token authorizationByRefresh(std::string refreshToken);
 
 
 		/*-------------------------
@@ -89,22 +86,22 @@ namespace yandexdisk {
 		-------------------------*/
 
 		// Создание директории
-		void makeDir(string path);
+		void makeDir(std::string path);
 
 		// Удаление файла\папки
-		void deleteResource(string path);
+		void deleteResource(std::string path);
 
 		// Очистить корзину
-		void deleteTrash(string path);
+		void deleteTrash(std::string path);
 
 		// Переместить ресурс
-		void moveResource(string from, string to, bool overwrite);
+		void moveResource(std::string from, std::string to, bool overwrite);
 
 		// Копировать ресурс
-		void copyResourse(string from, string to, bool overwrite);
+		void copyResourse(std::string from, std::string to, bool overwrite);
 
 		// Восстановить ресурс из корины
-		void recoverResoure(string from, string to, bool overwrite);
+		void recoverResoure(std::string from, std::string to, bool overwrite);
 
 
 		/*-------------------------
@@ -112,19 +109,19 @@ namespace yandexdisk {
 		-------------------------*/
 
 		// Получить информацию о диске
-		float getDiskData(string type);
+		float getDiskData(std::string type);
 
 		// Список файлов в папке
-		vector<File> getFileList(string path);
+		std::vector<File> getFileList(std::string path);
 
 		// Список файлов в корзине
-		vector<File> getTrashList(string path);
+		std::vector<File> getTrashList(std::string path);
 
 		// Статус операции
-		string getOperationStatus();
+		std::string getOperationStatus();
 
 		// Получить метаинформацию о ресурсе
-		File getMetaInfo(string path);
+		File getMetaInfo(std::string path);
 
 
 		/*-------------------------
@@ -132,23 +129,23 @@ namespace yandexdisk {
 		-------------------------*/
 
 		// Скачивание файла
-		void downloadFile(string from, string to);
+		void downloadFile(std::string from, std::string to);
 
 		// Загрузка файла
-		void uploadFile(string from, string to, bool overwrite);
+		void uploadFile(std::string from, std::string to, bool overwrite);
 
 		// Загрузка файла из интернета
-		void uploadFileFromUrl(string from, string to);
+		void uploadFileFromUrl(std::string from, std::string to);
 
 		/*-------------------------
 		ИЗМЕНЕНИЕ КОДИРОВКИ
 		-------------------------*/
 
 		// Перевод из UTF-8 в Windows-1251
-		string utf8ToCp1251(const char *str);
+		std::string utf8ToCp1251(const char *str);
 
 		// Перевод из Windows-1251 в UTF-8
-		string cp1251ToUtf8(const char *str);
+		std::string cp1251ToUtf8(const char *str);
 
 	};
 

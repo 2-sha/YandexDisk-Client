@@ -1,21 +1,7 @@
-#pragma comment(lib, "curllib.lib")
-#pragma comment(lib, "Shell32.lib")
+#include "stdafx.h"
 #include "YandexDisk.h"
 #include "Functions.h"
-#include "Common.h"
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <shlobj.h>
-#include <stdio.h>
-#include <sstream>
-#include <fstream>
-#include <map>
-#include <vector>
-#include <Windows.h>
-#include <iterator>
-#include <time.h>
-#include <iomanip>
+
 using namespace std;
 using namespace yandexdisk;
 
@@ -25,13 +11,10 @@ vector<File> fileList;
 const int helpWidth = 22;
 
 int main(int argc, char* argv[]) {
-	funcs["name"];
-
-	return;
 
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
-	cout.setf(ios::left);
+	std::cout.setf(ios::left);
 
 	char buf[MAX_PATH];
 	GetCurrentDirectory(sizeof(buf), buf);
@@ -174,6 +157,8 @@ int main(int argc, char* argv[]) {
 
 		// Список файлов в текущей директории
 		else if (findInInput(input, "ls")) {
+			vector<File> fileList;
+
 			if (isTrash)
 				fileList = yandexDisk.getTrashList(currentDir);
 			else

@@ -1,16 +1,12 @@
 #include "YandexDisk.h"
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <vector>
+#include "stdafx.h"
 #include "curl.h"
 #include "json.hpp" // https://habrahabr.ru/company/infopulse/blog/254075/
-using namespace std;
 using namespace yandexdisk;
 using json = nlohmann::json;
 
 
-size_t YandexDisk::writeData(char *ptr, size_t size, size_t nmemb, string* data) {
+size_t YandexDisk::writeData(char *ptr, size_t size, size_t nmemb, std::string* data) {
 	if (data) {
 		data->append(ptr, size*nmemb);
 		return size*nmemb;
@@ -27,7 +23,7 @@ size_t YandexDisk::read—allback(void *ptr, size_t size, size_t nmemb, FILE *stre
 };
 
 
-YandexDisk::YandexDisk(string clientId, string clientSecret)
+YandexDisk::YandexDisk(std::string clientId, std::string clientSecret)
 	: clientId_(clientId), clientSecret_(clientSecret) {}
 
 YandexDisk::~YandexDisk() {}
@@ -38,7 +34,7 @@ YandexDisk::~YandexDisk() {}
 Õ¿—“–Œ… ¿ » ¬€¬Œƒ œŒÀ≈…
 -------------------------*/
 
-void YandexDisk::setToken(string token) {
+void YandexDisk::setToken(std::string token) {
 	tokenHeader_ = "Authorization: OAuth " + token;
 }
 
@@ -46,7 +42,7 @@ void YandexDisk::deleteToken() {
 	tokenHeader_ = "";
 }
 
-string YandexDisk::getError() {
+std::string YandexDisk::getError() {
 	return error_;
 }
 
@@ -63,11 +59,11 @@ void YandexDisk::deleteProgressFunc() {
 CURL «¿œ–Œ—€
 -------------------------*/
 
-string YandexDisk::postQuery(const char href[], const char postFields[], const char headers[]) {
+std::string YandexDisk::postQuery(const char href[], const char postFields[], const char headers[]) {
 	CURL *curl = curl_easy_init();
 	struct curl_slist *list = NULL;
 	list = curl_slist_append(list, headers);
-	string body;
+	std::string body;
 
 	if (curl) {
 		curl_easy_setopt(curl, CURLOPT_URL, href);
@@ -96,11 +92,11 @@ string YandexDisk::postQuery(const char href[], const char postFields[], const c
 	return body;
 }
 
-string YandexDisk::restQuery(const char href[], const char type[], const char headers[]) {
+std::string YandexDisk::restQuery(const char href[], const char type[], const char headers[]) {
 	CURL *curl = curl_easy_init();
 	struct curl_slist *list = NULL;
 	list = curl_slist_append(list, headers);
-	string body;
+	std::string body;
 
 	if (curl) {
 		curl_easy_setopt(curl, CURLOPT_URL, href);
@@ -129,12 +125,12 @@ string YandexDisk::restQuery(const char href[], const char type[], const char he
 	return body;
 }
 
-string YandexDisk::putQuery(const char href[], const char fileLink[], const char headers[]) {
+std::string YandexDisk::putQuery(const char href[], const char fileLink[], const char headers[]) {
 	CURL *curl = curl_easy_init();
 	struct curl_slist *list = NULL;
 	list = curl_slist_append(list, headers);
 	struct stat file_info;
-	string body;
+	std::string body;
 
 	FILE *fd;
 	fopen_s(&fd, fileLink, "rb");
@@ -174,9 +170,9 @@ string YandexDisk::putQuery(const char href[], const char fileLink[], const char
 ¿¬“Œ–»«¿÷»ﬂ
 -------------------------*/
 
-Token YandexDisk::authorizationByCode(string code) {
+Token YandexDisk::authorizationByCode(std::string code) {
 	error_ = "";
-	string post = "grant_type=authorization_code&code=" + code + "&client_id=" + clientId_ + "&client_secret=" + clientSecret_;
+	std::string post = "grant_type=authorization_code&code=" + code + "&client_id=" + clientId_ + "&client_secret=" + clientSecret_;
 	json j = json::parse(postQuery("https://oauth.yandex.ru/token", post.c_str()));
 	Token data;
 	if (j.find("access_token") != j.end()) {
@@ -190,9 +186,9 @@ Token YandexDisk::authorizationByCode(string code) {
 	return data;
 }
 
-Token YandexDisk::authorizationByRefresh(string refreshToken) {
+Token YandexDisk::authorizationByRefresh(std::string refreshToken) {
 	error_ = "";
-	string post = "grant_type=refresh_token&refresh_token=" + refreshToken + "&client_id=" + clientId_ + "&client_secret=" + clientSecret_;
+	std::string post = "grant_type=refresh_token&refresh_token=" + refreshToken + "&client_id=" + clientId_ + "&client_secret=" + clientSecret_;
 	json j = json::parse(postQuery("https://oauth.yandex.ru/token", post.c_str()));
 	Token data;
 	if (j.find("access_token") != j.end()) {
@@ -211,7 +207,7 @@ Token YandexDisk::authorizationByRefresh(string refreshToken) {
 Œœ≈–¿÷»» Õ¿ƒ –≈—”–—¿Ã»
 -------------------------*/
 
-void YandexDisk::makeDir(string path) {
+void YandexDisk::makeDir(std::string path) {
 	error_ = "";
 	CURL *curl = curl_easy_init();
 	path = cp1251ToUtf8(path.c_str());
@@ -222,14 +218,14 @@ void YandexDisk::makeDir(string path) {
 		error_ = j["error"];
 }
 
-void YandexDisk::deleteResource(string path) {
+void YandexDisk::deleteResource(std::string path) {
 	error_ = "";
 	currentOperation_ = "";
 	CURL *curl = curl_easy_init();
 	path = cp1251ToUtf8(path.c_str());
 	path = curl_easy_escape(curl, path.c_str(), path.length());
 	path = "https://cloud-api.yandex.net:443/v1/disk/resources?path=" + path;
-	string answ = restQuery(path.c_str(), "DELETE", tokenHeader_.c_str());
+	std::string answ = restQuery(path.c_str(), "DELETE", tokenHeader_.c_str());
 	if (answ.empty())
 		return;
 	json j = json::parse(answ);
@@ -241,14 +237,14 @@ void YandexDisk::deleteResource(string path) {
 		error_ = j["error"];
 }
 
-void YandexDisk::deleteTrash(string path) {
+void YandexDisk::deleteTrash(std::string path) {
 	error_ = "";
 	currentOperation_ = "";
 	CURL *curl = curl_easy_init();
 	path = cp1251ToUtf8(path.c_str());
 	path = curl_easy_escape(curl, path.c_str(), path.length());
 	path = "https://cloud-api.yandex.net/v1/disk/trash/resources?path=" + path;
-	string answ = restQuery(path.c_str(), "DELETE", tokenHeader_.c_str());
+	std::string answ = restQuery(path.c_str(), "DELETE", tokenHeader_.c_str());
 	if (answ.empty())
 		return;
 	json j = json::parse(answ);
@@ -260,7 +256,7 @@ void YandexDisk::deleteTrash(string path) {
 		error_ = j["error"];
 }
 
-void YandexDisk::moveResource(string from, string to, bool overwrite) {
+void YandexDisk::moveResource(std::string from, std::string to, bool overwrite) {
 	error_ = "";
 	currentOperation_ = "";
 	CURL *curl = curl_easy_init();
@@ -268,14 +264,14 @@ void YandexDisk::moveResource(string from, string to, bool overwrite) {
 	from = curl_easy_escape(curl, from.c_str(), from.length());
 	to = cp1251ToUtf8(to.c_str());
 	to = curl_easy_escape(curl, to.c_str(), to.length());
-	string path = "https://cloud-api.yandex.net/v1/disk/resources/move?from="
+	std::string path = "https://cloud-api.yandex.net/v1/disk/resources/move?from="
 		+ from + "&path="
 		+ to + "&overwrite=" +
 		+ ((overwrite) ? "true" : "false");
 	json j = json::parse(restQuery(path.c_str(), "POST", tokenHeader_.c_str()));
 	if (j.find("href") != j.end()) {
 		currentOperation_ = j["href"];
-		if (currentOperation_.find("path") == string::npos)
+		if (currentOperation_.find("path") == std::string::npos)
 			currentOperation_ = currentOperation_.substr(currentOperation_.find_last_of("/") + 1);
 		else
 			currentOperation_ = "";
@@ -284,7 +280,7 @@ void YandexDisk::moveResource(string from, string to, bool overwrite) {
 		error_ = j["error"];
 }
 
-void YandexDisk::copyResourse(string from, string to, bool overwrite) {
+void YandexDisk::copyResourse(std::string from, std::string to, bool overwrite) {
 	error_ = "";
 	currentOperation_ = "";
 	CURL *curl = curl_easy_init();
@@ -292,14 +288,14 @@ void YandexDisk::copyResourse(string from, string to, bool overwrite) {
 	from = curl_easy_escape(curl, from.c_str(), from.length());
 	to = cp1251ToUtf8(to.c_str());
 	to = curl_easy_escape(curl, to.c_str(), to.length());
-	string path = "https://cloud-api.yandex.net/v1/disk/resources/copy?from="
+	std::string path = "https://cloud-api.yandex.net/v1/disk/resources/copy?from="
 		+ from + "&path="
 		+ to + "&overwrite=" +
 		+((overwrite) ? "true" : "false");
 	json j = json::parse(restQuery(path.c_str(), "POST", tokenHeader_.c_str()));
 	if (j.find("href") != j.end()) {
 		currentOperation_ = j["href"];
-		if (currentOperation_.find("path") == string::npos)
+		if (currentOperation_.find("path") == std::string::npos)
 			currentOperation_ = currentOperation_.substr(currentOperation_.find_last_of("/") + 1);
 		else
 			currentOperation_ = "";
@@ -308,13 +304,13 @@ void YandexDisk::copyResourse(string from, string to, bool overwrite) {
 		error_ = j["error"];
 }
 
-void YandexDisk::recoverResoure(string from, string to, bool overwrite) {
+void YandexDisk::recoverResoure(std::string from, std::string to, bool overwrite) {
 	error_ = "";
 	currentOperation_ = "";
 	CURL *curl = curl_easy_init();
 	from = cp1251ToUtf8(from.c_str());
 	from = curl_easy_escape(curl, from.c_str(), from.length());
-	string path = "https://cloud-api.yandex.net/v1/disk/trash/resources/restore?path=" + from;
+	std::string path = "https://cloud-api.yandex.net/v1/disk/trash/resources/restore?path=" + from;
 	if (!to.empty()) {
 		to = cp1251ToUtf8(to.c_str());
 		to = curl_easy_escape(curl, to.c_str(), to.length());
@@ -323,7 +319,7 @@ void YandexDisk::recoverResoure(string from, string to, bool overwrite) {
 	json j = json::parse(restQuery(path.c_str(), "PUT", tokenHeader_.c_str()));
 	if (j.find("href") != j.end()) {
 		currentOperation_ = j["href"];
-		if (currentOperation_.find("path") == string::npos)
+		if (currentOperation_.find("path") == std::string::npos)
 			currentOperation_ = currentOperation_.substr(currentOperation_.find_last_of("/") + 1);
 		else
 			currentOperation_ = "";
@@ -337,7 +333,7 @@ void YandexDisk::recoverResoure(string from, string to, bool overwrite) {
 œŒÀ”◊≈Õ»≈ »Õ‘Œ–Ã¿÷»»
 -------------------------*/
 
-float YandexDisk::getDiskData(string type) {
+float YandexDisk::getDiskData(std::string type) {
 	error_ = "";
 	json j = json::parse(restQuery("https://cloud-api.yandex.net/v1/disk/", "GET", tokenHeader_.c_str()));
 	if (j.find(type) != j.end())
@@ -347,20 +343,20 @@ float YandexDisk::getDiskData(string type) {
 	return 0;
 }
 
-vector<File> YandexDisk::getFileList(string path) {
+std::vector<File> YandexDisk::getFileList(std::string path) {
 	error_ = "";
 	CURL *curl = curl_easy_init();
 	path = cp1251ToUtf8(path.c_str());
 	path = curl_easy_escape(curl, path.c_str(), path.length());
 	path = "https://cloud-api.yandex.net/v1/disk/resources?path=" + path + "&limit=1000";
 	json j = json::parse(restQuery(path.c_str(), "GET", tokenHeader_.c_str()));
-	vector<File> data;
+	std::vector<File> data;
 	if (j.find("_embedded") != j.end()) {
 		int size = j["_embedded"]["items"].size();
 		if (size) {
 			data.resize(size);
 			for (int i = 0; i < size; i++) {
-				string s;
+				std::string s;
 				struct tm timeinfo;
 
 				data[i].name = j["_embedded"]["items"][i]["name"];
@@ -401,20 +397,20 @@ vector<File> YandexDisk::getFileList(string path) {
 	return data;
 }
 
-vector<File> YandexDisk::getTrashList(string path) {
+std::vector<File> YandexDisk::getTrashList(std::string path) {
 	error_ = "";
 	CURL *curl = curl_easy_init();
 	path = cp1251ToUtf8(path.c_str());
 	path = curl_easy_escape(curl, path.c_str(), path.length());
 	path = "https://cloud-api.yandex.net/v1/disk/trash/resources?path=" + path + "&limit=1000";
 	json j = json::parse(restQuery(path.c_str(), "GET", tokenHeader_.c_str()));
-	vector<File> data;
+	std::vector<File> data;
 	if (j.find("_embedded") != j.end()) {
 		int size = j["_embedded"]["items"].size();
 		if (size) {
 			data.resize(size);
 			for (int i = 0; i < size; i++) {
-				string s;
+				std::string s;
 				struct tm timeinfo;
 
 				data[i].name = j["_embedded"]["items"][i]["path"];
@@ -456,17 +452,17 @@ vector<File> YandexDisk::getTrashList(string path) {
 	return data;
 }
 
-string YandexDisk::getOperationStatus() {
+std::string YandexDisk::getOperationStatus() {
 	error_ = "";
 	if (currentOperation_.empty())
 		return "";
-	json j = json::parse(restQuery([](string a, string b) {
+	json j = json::parse(restQuery([](std::string a, std::string b) {
 		return a + b;
 	}("https://cloud-api.yandex.net/v1/disk/operations/", currentOperation_).c_str(), "GET", tokenHeader_.c_str()));
 	return j["status"];
 }
 
-File YandexDisk::getMetaInfo(string path) {
+File YandexDisk::getMetaInfo(std::string path) {
 	error_ = "";
 	CURL *curl = curl_easy_init();
 	path = cp1251ToUtf8(path.c_str());
@@ -475,7 +471,7 @@ File YandexDisk::getMetaInfo(string path) {
 	json j = json::parse(restQuery(path.c_str(), "PATCH", tokenHeader_.c_str()));
 	File file;
 	if (j.find("name") != j.end()) {
-		string s;
+		std::string s;
 		struct tm timeinfo;
 
 		file.name = j["name"];
@@ -519,9 +515,9 @@ File YandexDisk::getMetaInfo(string path) {
 «¿√–”« ¿ » — ¿◊»¬¿Õ»≈ ‘¿…ÀŒ¬
 -------------------------*/
 
-void YandexDisk::downloadFile(string from, string to) {
+void YandexDisk::downloadFile(std::string from, std::string to) {
 	error_ = "";
-	string answ;
+	std::string answ;
 	bool b = false;
 	CURL *curl = curl_easy_init();
 	from = cp1251ToUtf8(from.c_str());
@@ -530,7 +526,7 @@ void YandexDisk::downloadFile(string from, string to) {
 	json j = json::parse(restQuery(from.c_str(), "GET", tokenHeader_.c_str()));
 	if (j.find("href") != j.end()) {
 		answ = j["href"];
-		ofstream file(to, ios_base::binary);
+		std::ofstream file(to, std::ios_base::binary);
 		if (file.is_open()) {
 			file << restQuery(answ.c_str(), "GET", tokenHeader_.c_str());
 			file.close();
@@ -543,10 +539,10 @@ void YandexDisk::downloadFile(string from, string to) {
 	}
 }
 
-void YandexDisk::uploadFile(string from, string to, bool overwrite) {
+void YandexDisk::uploadFile(std::string from, std::string to, bool overwrite) {
 	error_ = "";
 	currentOperation_ = "";
-	ifstream file(from);
+	std::ifstream file(from);
 	if (!file.is_open()) {
 		error_ = "Unable to open file";
 		return;
@@ -562,11 +558,11 @@ void YandexDisk::uploadFile(string from, string to, bool overwrite) {
 		error_ = j["error"];
 		return;
 	}
-	string s = j["href"];
+	std::string s = j["href"];
 	putQuery(s.c_str(), from.c_str(), tokenHeader_.c_str());
 }
 
-void YandexDisk::uploadFileFromUrl(string from, string to) {
+void YandexDisk::uploadFileFromUrl(std::string from, std::string to) {
 	error_ = "";
 	currentOperation_ = "";
 	CURL *curl = curl_easy_init();
@@ -588,8 +584,8 @@ void YandexDisk::uploadFileFromUrl(string from, string to) {
 »«Ã≈Õ≈Õ»≈  Œƒ»–Œ¬ »
 -------------------------*/
 
-string YandexDisk::utf8ToCp1251(const char *str) {
-	string res;
+std::string YandexDisk::utf8ToCp1251(const char *str) {
+	std::string res;
 	int result_u, result_c;
 	result_u = MultiByteToWideChar(CP_UTF8, 0, str, -1, 0, 0);
 	if (!result_u)
@@ -615,8 +611,8 @@ string YandexDisk::utf8ToCp1251(const char *str) {
 	return res;
 }
 
-string YandexDisk::cp1251ToUtf8(const char *str) {
-	string res;
+std::string YandexDisk::cp1251ToUtf8(const char *str) {
+	std::string res;
 	int result_u, result_c;
 	result_u = MultiByteToWideChar(1251, 0, str, -1, 0, 0);
 	if (!result_u)

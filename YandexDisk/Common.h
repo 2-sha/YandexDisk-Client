@@ -1,34 +1,32 @@
 #pragma once
-#include <string>
-#include <vector>
-using namespace std;
+#include "stdafx.h"
 
 extern bool isTrash;
-extern string currentDir, dataRef, configRef, clientId, clientSecret, token, refreshToken;
+extern std::string currentDir, dataRef, configRef, clientId, clientSecret, token, refreshToken;
 
 // Перевод байтов в более крупные еденицы
-string convertBytes(double bytes);
+std::string convertBytes(double bytes);
 
 // 
-void authorize(YandexDisk &yd, string &token, string &refreshToken);
+// void authorize(YandexDisk &yd, string &token, string &refreshToken);
 
 // Получить строку от пользователя
-string getStr(bool global = false);
+std::string getStr(bool global = false);
 
 // Получить список файлов из директории
-vector<vector<string>> getFileList(const char *root);
+std::vector<std::vector<std::string>> getFileList(const char *root);
 
 // Разделить строку по разделителю
-vector<string> split(string str, string sep);
+std::vector<std::string> split(std::string str, std::string sep);
 
 // Перевод путя из относительного в абсолютный
-void pathTuning(string &path);
+void pathTuning(std::string &path);
 
 // 
-bool findInInput(string input, string command);
+bool findInInput(std::string input, std::string command);
 
 // Спросить пользователя (Y/N):
-bool getUserAnsw(string str);
+bool getUserAnsw(std::string str);
 
 // Функция прогресса
 int progress(void *p, double dltotal, double dlnow, double ultotal, double ulnow);
