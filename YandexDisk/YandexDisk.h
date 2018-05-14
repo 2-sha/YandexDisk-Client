@@ -1,5 +1,5 @@
 #pragma once
-#pragma comment(lib,"curllib.lib")
+#pragma comment(lib,"curl/curllib.lib")
 #include <string>
 #include <iostream>
 #include <vector>
