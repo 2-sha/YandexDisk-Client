@@ -8,3 +8,5 @@ extern bool isTrash;
 extern std::string currentDir, dataRef, configRef, clientId, clientSecret, token, refreshToken;
 
 extern std::map<std::string, void(*)(std::string)> functions;
+
+std::vector<std::string> split(std::string, std::string);
